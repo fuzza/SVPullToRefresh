@@ -210,11 +210,7 @@ static char UIScrollViewPullToRefreshView;
 }
 
 - (void)layoutSubviews {
-    
-    for(id otherView in self.viewForState) {
-        if([otherView isKindOfClass:[UIView class]])
-            [otherView removeFromSuperview];
-    }
+    [super layoutSubviews];
     
     id customView = [self.viewForState objectAtIndex:self.state];
     BOOL hasCustomView = [customView isKindOfClass:[UIView class]];
@@ -224,10 +220,16 @@ static char UIScrollViewPullToRefreshView;
     self.arrow.hidden = hasCustomView;
     
     if(hasCustomView) {
-        [self addSubview:customView];
-        CGRect viewBounds = [customView bounds];
-        CGPoint origin = CGPointMake(roundf((self.bounds.size.width-viewBounds.size.width)/2), roundf((self.bounds.size.height-viewBounds.size.height)/2));
-        [customView setFrame:CGRectMake(origin.x, origin.y, viewBounds.size.width, viewBounds.size.height)];
+        if([customView superview] != self){
+            for(id otherView in self.viewForState){
+                if([otherView isKindOfClass:[UIView class]])
+                    [otherView removeFromSuperview];
+            }
+            [self addSubview:customView];
+            CGRect viewBounds = [customView bounds];
+            CGPoint origin = CGPointMake(roundf((self.bounds.size.width-viewBounds.size.width)/2), roundf((self.bounds.size.height-viewBounds.size.height)/2));
+            [customView setFrame:CGRectMake(origin.x, origin.y, viewBounds.size.width, viewBounds.size.height)];
+        }
     }
     else {
         switch (self.state) {
@@ -294,9 +296,9 @@ static char UIScrollViewPullToRefreshView;
         
         CGFloat totalMaxWidth;
         if (maxLabelWidth) {
-        	totalMaxWidth = leftViewWidth + margin + maxLabelWidth;
+            totalMaxWidth = leftViewWidth + margin + maxLabelWidth;
         } else {
-        	totalMaxWidth = leftViewWidth + maxLabelWidth;
+            totalMaxWidth = leftViewWidth + maxLabelWidth;
         }
         
         CGFloat labelX = (self.bounds.size.width / 2) - (totalMaxWidth / 2) + leftViewWidth + margin;
